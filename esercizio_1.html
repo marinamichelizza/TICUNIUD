@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crucipuzzle - Esercizio 1</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-blue: #3498db;
+            --accent-green: #2ecc71;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #4a6572);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin: 0 0 10px 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            color: #e0e0e0;
+            font-size: 1.1rem;
+            margin: 0;
+            font-weight: 300;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: transform 0.2s ease;
+        }
+
+        .card-difficolta {
+            border-top: 5px solid var(--accent-blue);
+        }
+
+        .card-obiettivi {
+            border-top: 5px solid var(--accent-green);
+        }
+
+        .card-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 14px;
+            font-size: 1.05rem;
+            color: #444;
+        }
+
+        .card-difficolta li::before {
+            content: "▹";
+            color: var(--accent-blue);
+            font-size: 1.4rem;
+            position: absolute;
+            left: 5px;
+            top: -2px;
+            font-weight: bold;
+        }
+
+        .card-obiettivi li::before {
+            content: "✓";
+            color: var(--accent-green);
+            font-size: 1.2rem;
+            position: absolute;
+            left: 5px;
+            top: 0;
+            font-weight: bold;
+        }
+
+        .badge {
+            background-color: #e8f4fc;
+            color: #2980b9;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .badge-green {
+            background-color: #e8f8f5;
+            color: #27ae60;
+        }
+
+        footer {
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Crucipuzzle</h1>
+            <p class="subtitle">Esercizio 1 – Scheda Tecnica e Obiettivi Didattici</p>
+        </header>
+
+        <main>
+            <section class="card card-difficolta">
+                <h2 class="card-title">
+                    <span>🎮</span> Difficoltà del gioco
+                </h2>
+                <ul>
+                    <li>Parole solo orizzontali, verticali, oblique</li>
+                    <li>Consultare le fonti o no</li>
+                    <li>A tempo</li>
+                    <li>Cerchiare solo le parole che si sono ascoltate in un audio/testo precedente</li>
+                    <li>Se ci sono sia parole scritte con grafia errata sia corretta, cerchiare solo le parole corrette</li>
+                    <li>In presenza di parole appartenenti a più campi semantici, scegliere solo quelle di un determinato campo</li>
+                    <li>Cerchiare solo le parole che rispondono ad alcune domande poste</li>
+                </ul>
+            </section>
+
+            <section class="card card-obiettivi">
+                <h2 class="card-title">
+                    <span>🎯</span> Obiettivi
+                </h2>
+                <ul>
+                    <li>Riconoscere le sillabe <span class="badge badge-green">primario</span></li>
+                    <li>Riconoscere la grafia corretta delle parole</li>
+                    <li>Scegliere le parole in base al criterio indicato, oltre a individuarle (doppio compito)</li>
+                    <li>Mantenere la concentrazione</li>
+                    <li>Allenare la memoria se si deve ricordare la risposta a una domanda e cercarla nel crucipuzzle</li>
+                    <li>Ampliare il lessico <span class="badge">es. per NAI</span></li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p>Contenuto estratto da <em>Esercizio 1.docx</em></p>
+        </footer>
+    </div>
+</body>
+</html>

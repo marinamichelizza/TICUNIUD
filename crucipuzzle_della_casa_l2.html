@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crucipuzzle della Casa - Italiano L2</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Font Family Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    /* Touch optimization */
+    .grid-container {
+      touch-action: none;
+    }
+    /* Smooth transitions */
+    .cell-transition {
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    /* Keyframe pulse for hint */
+    @keyframes pulse-hint {
+      0%, 100% { transform: scale(1); ring: 4px; }
+      50% { transform: scale(1.15); }
+    }
+    .animate-hint {
+      animation: pulse-hint 0.6s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between">
+
+  <!-- HEADER -->
+  <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-20">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl">🏠</span>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 flex items-center gap-2">
+            Crucipuzzle della Casa
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+              Italiano L2 (A1-A2)
+            </span>
+          </h1>
+          <p class="text-xs text-slate-500">Trova le stanze e gli oggetti della casa!</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="hintBtn" onclick="giveHint()" class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-sm active:scale-95 transition-all">
+          <span>💡</span> Suggerimento
+        </button>
+        <button onclick="initGame()" class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-sm active:scale-95 transition-all">
+          <span>🔄</span> Nuova Partita
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="max-w-6xl mx-auto px-4 py-4 sm:py-6 flex-grow w-full flex flex-col gap-5">
+
+    <!-- STATS & ROOM FILTERS BAR -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Stats (Timer & Progress) -->
+      <div class="flex items-center gap-6 w-full md:w-auto justify-around md:justify-start">
+        <div class="flex items-center gap-2">
+          <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg text-lg">⏱️</div>
+          <div>
+            <div class="text-xs text-slate-400 font-medium uppercase tracking-wider">Tempo</div>
+            <div id="timerDisplay" class="text-lg font-bold text-slate-700">00:00</div>
+          </div>
+        </div>
+
+        <div class="h-8 w-px bg-slate-200"></div>
+
+        <div class="flex items-center gap-2">
+          <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg text-lg">🎯</div>
+          <div>
+            <div class="text-xs text-slate-400 font-medium uppercase tracking-wider">Trovate</div>
+            <div class="text-lg font-bold text-slate-700">
+              <span id="foundCount">0</span> / <span id="totalCount">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="flex flex-wrap items-center justify-center gap-1.5 w-full md:w-auto" id="categoryTabs">
+        <!-- Injected dynamically via JS -->
+      </div>
+    </div>
+
+    <!-- GAME BOARD & WORD LIST CONTAINER -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- PUZZLE GRID (Lg: 7 cols) -->
+      <div class="lg:col-span-7 flex flex-col items-center">
+        <div class="bg-slate-800 p-2 sm:p-4 rounded-2xl shadow-xl w-full max-w-[520px] aspect-square grid-container relative">
+          <!-- 12x12 Grid Container -->
+          <div id="grid" class="grid grid-cols-12 gap-1 w-full h-full select-none">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+        <p class="text-xs text-slate-500 mt-2 text-center">
+          👉 Trascina il dito/mouse sulle lettere o tocca la prima e l'ultima lettera per selezionare una parola.
+        </p>
+      </div>
+
+      <!-- WORDS LIST PANEL (Lg: 5 cols) -->
+      <div class="lg:col-span-5 bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col h-full">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <h2 class="font-bold text-slate-800 text-base sm:text-lg flex items-center gap-2">
+            <span>📋</span> Parole da Cercare
+          </h2>
+          <span class="text-xs text-slate-400">Clicca sull'icona 🔊 per l'audio</span>
+        </div>
+
+        <!-- Scrollable list of words -->
+        <div id="wordList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 max-h-[460px] overflow-y-auto pr-1">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-2xl text-sm font-medium opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2">
+    <span id="toastIcon">💡</span>
+    <span id="toastMessage">Messaggio di prova</span>
+  </div>
+
+  <!-- VICTORY MODAL -->
+  <div id="winModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl border border-slate-100 transform scale-95 transition-all">
+      <div class="text-6xl mb-3">🏆</div>
+      <h2 class="text-2xl font-black text-slate-800 mb-1">Bravissimo / Bravissima!</h2>
+      <p class="text-emerald-600 font-bold mb-4">Hai completato il crucipuzzle!</p>
+      
+      <div class="bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-100 flex justify-around">
+        <div>
+          <div class="text-xs text-slate-400 font-semibold uppercase">Tempo Impiegato</div>
+          <div id="winTime" class="text-xl font-extrabold text-slate-700">00:00</div>
+        </div>
+        <div class="w-px bg-slate-200"></div>
+        <div>
+          <div class="text-xs text-slate-400 font-semibold uppercase">Parole Trovate</div>
+          <div id="winWords" class="text-xl font-extrabold text-slate-700">0 / 0</div>
+        </div>
+      </div>
+
+      <p class="text-slate-600 text-sm mb-6">
+        Hai imparato e ripassato i nomi delle stanze e degli oggetti della casa in italiano! 🇮🇹✨
+      </p>
+
+      <button onclick="closeWinModal(); initGame();" class="w-full py-3.5 px-6 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/20 active:scale-95 transition-all text-base">
+        🎮 Gioca di Nuovo
+      </button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-400 mt-6">
+    Crucipuzzle della Casa • Strumento didattico per l'apprendimento della lingua italiana L2
+  </footer>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    // --- DATABASE VOCABOLARIO (A1-A2) ---
+    const CATEGORIES = {
+      tutte: { name: 'Tutte', icon: '🏠', color: 'bg-indigo-500' },
+      cucina: { name: 'Cucina', icon: '🍳', color: 'bg-amber-500' },
+      salotto: { name: 'Salotto', icon: '🛋️', color: 'bg-blue-500' },
+      camera: { name: 'Camera', icon: '🛏️', color: 'bg-purple-500' },
+      bagno: { name: 'Bagno', icon: '🧼', color: 'bg-teal-500' },
+      altre: { name: 'Altre Stanze', icon: '🚪', color: 'bg-emerald-500' }
+    };
+
+    const RAW_WORDS = [
+      // Stanze
+      { word: 'CUCINA', category: 'cucina', article: 'la', translation: 'Kitchen', icon: '🍳' },
+      { word: 'SALOTTO', category: 'salotto', article: 'il', translation: 'Living Room', icon: '🛋️' },
+      { word: 'CAMERA', category: 'camera', article: 'la', translation: 'Bedroom', icon: '🛏️' },
+      { word: 'BAGNO', category: 'bagno', article: 'il', translation: 'Bathroom', icon: '🧼' },
+      { word: 'GIARDINO', category: 'altre', article: 'il', translation: 'Garden', icon: '🏡' },
+      { word: 'INGRESSO', category: 'altre', article: "l'", translation: 'Entrance', icon: '🚪' },
+
+      // Oggetti Cucina
+      { word: 'TAVOLO', category: 'cucina', article: 'il', translation: 'Table', icon: '🪑' },
+      { word: 'SEDIA', category: 'cucina', article: 'la', translation: 'Chair', icon: '🪑' },
+      { word: 'FRIGO', category: 'cucina', article: 'il', translation: 'Fridge', icon: '🧊' },
+      { word: 'FORNO', category: 'cucina', article: 'il', translation: 'Oven', icon: '🔥' },
+      { word: 'PIATTO', category: 'cucina', article: 'il', translation: 'Plate', icon: '🍽️' },
+      { word: 'BICCHIERE', category: 'cucina', article: 'il', translation: 'Glass', icon: '🍷' },
+
+      // Oggetti Salotto
+      { word: 'DIVANO', category: 'salotto', article: 'il', translation: 'Sofa', icon: '🛋️' },
+      { word: 'TAPPETO', category: 'salotto', article: 'il', translation: 'Rug', icon: '🧹' },
+      { word: 'TELEVISORE', category: 'salotto', article: 'il', translation: 'TV', icon: '📺' },
+      { word: 'LAMPADA', category: 'salotto', article: 'la', translation: 'Lamp', icon: '💡' },
+      { word: 'LIBRERIA', category: 'salotto', article: 'la', translation: 'Bookcase', icon: '📚' },
+
+      // Oggetti Camera
+      { word: 'LETTO', category: 'camera', article: 'il', translation: 'Bed', icon: '🛏️' },
+      { word: 'ARMADIO', category: 'camera', article: "l'", translation: 'Wardrobe', icon: '🚪' },
+      { word: 'CUSCINO', category: 'camera', article: 'il', translation: 'Pillow', icon: '☁️' },
+      { word: 'SPECCHIO', category: 'camera', article: 'lo', translation: 'Mirror', icon: '🪞' },
+
+      // Oggetti Bagno
+      { word: 'DOCCIA', category: 'bagno', article: 'la', translation: 'Shower', icon: '🚿' },
+      { word: 'LAVANDINO', category: 'bagno', article: 'il', translation: 'Sink', icon: '🚰' },
+      { word: 'SAPONE', category: 'bagno', article: 'il', translation: 'Soap', icon: '🧼' },
+      { word: 'ASCIUGAMANO', category: 'bagno', article: "l'", translation: 'Towel', icon: '🧺' }
+    ];
+
+    // Palette per evidenziare le parole trovate
+    const COLOR_PALETTE = [
+      'bg-emerald-400 text-slate-900 border-emerald-500',
+      'bg-sky-400 text-slate-900 border-sky-500',
+      'bg-amber-400 text-slate-900 border-amber-500',
+      'bg-rose-400 text-slate-900 border-rose-500',
+      'bg-violet-400 text-slate-900 border-violet-500',
+      'bg-teal-400 text-slate-900 border-teal-500',
+      'bg-pink-400 text-slate-900 border-pink-500',
+      'bg-orange-400 text-slate-900 border-orange-500'
+    ];
+
+    // --- GAME STATE ---
+    const GRID_SIZE = 12;
+    let state = {
+      grid: [],             // 12x12 2D array of chars
+      placedWords: [],      // Array of placed word objects { word, article, translation, category, icon, path, found, color }
+      activeCategory: 'tutte',
+      isSelecting: false,
+      startCell: null,      // { r, c }
+      currentPath: [],      // Array of { r, c } currently selected
+      tapStartCell: null,   // For tap-tap selection mode
+      foundCellsMap: {},    // "r_c" -> color class
+      timerSeconds: 0,
+      timerInterval: null,
+      hintedCell: null
+    };
+
+    // --- INITIALIZATION ---
+    window.onload = function() {
+      renderCategoryTabs();
+      initGame();
+      setupInputListeners();
+    };
+
+    function initGame() {
+      // Clear state & timer
+      clearInterval(state.timerInterval);
+      state.timerSeconds = 0;
+      updateTimerDisplay();
+      state.timerInterval = setInterval(() => {
+        state.timerSeconds++;
+        updateTimerDisplay();
+      }, 1000);
+
+      state.isSelecting = false;
+      state.startCell = null;
+      state.currentPath = [];
+      state.tapStartCell = null;
+      state.foundCellsMap = {};
+      state.hintedCell = null;
+
+      // Generate Grid & Place Words
+      generateBoard();
+
+      // Render UI
+      renderGrid();
+      renderWordList();
+      updateProgress();
+    }
+
+    // --- GRID GENERATION ALGORITHM ---
+    function generateBoard() {
+      // Reset empty grid
+      state.grid = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(''));
+      state.placedWords = [];
+
+      // Copy and shuffle word pool, sorting by word length descending
+      let pool = [...RAW_WORDS].sort((a, b) => b.word.length - a.word.length);
+
+      // Directions: Forward & Backward (Horizontal, Vertical, Diagonal)
+      const directions = [
+        [0, 1],   // Right
+        [1, 0],   // Down
+        [1, 1],   // Down-Right
+        [-1, 1],  // Up-Right
+        [0, -1],  // Left
+        [-1, 0],  // Up
+        [1, -1],  // Down-Left
+        [-1, -1]  // Up-Left
+      ];
+
+      let colorIdx = 0;
+
+      for (let wordObj of pool) {
+        let word = wordObj.word;
+        let placed = false;
+        let attempts = 0;
+        const maxAttempts = 120;
+
+        while (!placed && attempts < maxAttempts) {
+          attempts++;
+          let dir = directions[Math.floor(Math.random() * directions.length)];
+          let startR = Math.floor(Math.random() * GRID_SIZE);
+          let startC = Math.floor(Math.random() * GRID_SIZE);
+
+          let endR = startR + dir[0] * (word.length - 1);
+          let endC = startC + dir[1] * (word.length - 1);
+
+          // Check bounds
+          if (endR >= 0 && endR < GRID_SIZE && endC >= 0 && endC < GRID_SIZE) {
+            let canPlace = true;
+            let path = [];
+
+            for (let i = 0; i < word.length; i++) {
+              let r = startR + dir[0] * i;
+              let c = startC + dir[1] * i;
+              let char = word[i];
+
+              if (state.grid[r][c] !== '' && state.grid[r][c] !== char) {
+                canPlace = false;
+                break;
+              }
+              path.push({ r, c });
+            }
+
+            if (canPlace) {
+              // Write char to grid
+              for (let i = 0; i < word.length; i++) {
+                state.grid[path[i].r][path[i].c] = word[i];
+              }
+              state.placedWords.push({
+                ...wordObj,
+                path: path,
+                found: false,
+                color: COLOR_PALETTE[colorIdx % COLOR_PALETTE.length]
+              });
+              colorIdx++;
+              placed = true;
+            }
+          }
+        }
+      }
+
+      // Fill remaining empty cells with Italian letter frequencies (more vowels!)
+      const italianLetters = "AAAAAEEEEEEIIIIIOOOOOOUUUUBCDFGHLMNPRSTVZ";
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          if (state.grid[r][c] === '') {
+            state.grid[r][c] = italianLetters[Math.floor(Math.random() * italianLetters.length)];
+          }
+        }
+      }
+    }
+
+    // --- RENDER FUNCTIONS ---
+    function renderCategoryTabs() {
+      const container = document.getElementById('categoryTabs');
+      container.innerHTML = Object.keys(CATEGORIES).map(key => {
+        const cat = CATEGORIES[key];
+        const isActive = state.activeCategory === key;
+        return `
+          <button onclick="setCategory('${key}')" className="pill-btn" class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+            isActive 
+              ? `${cat.color} text-white shadow-sm scale-105` 
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+          }">
+            <span>${cat.icon}</span>
+            <span>${cat.name}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function setCategory(catKey) {
+      state.activeCategory = catKey;
+      renderCategoryTabs();
+      renderWordList();
+    }
+
+    function renderGrid() {
+      const container = document.getElementById('grid');
+      container.innerHTML = '';
+
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          const key = `${r}_${c}`;
+          const letter = state.grid[r][c];
+
+          const isSelecting = state.currentPath.some(pt => pt.r === r && pt.c === c);
+          const isTapStart = state.tapStartCell && state.tapStartCell.r === r && state.tapStartCell.c === c;
+          const foundColor = state.foundCellsMap[key];
+          const isHinted = state.hintedCell && state.hintedCell.r === r && state.hintedCell.c === c;
+
+          let cellClasses = "w-full h-full rounded-lg flex items-center justify-center font-extrabold text-xs sm:text-sm md:text-base border transition-all duration-100 cursor-pointer cell-transition ";
+
+          if (isSelecting || isTapStart) {
+            cellClasses += "bg-indigo-500 text-white border-indigo-400 scale-105 shadow-md z-10 ";
+          } else if (foundColor) {
+            cellClasses += `${foundColor} font-black shadow-inner `;
+          } else if (isHinted) {
+            cellClasses += "bg-amber-300 text-slate-900 border-amber-500 animate-hint z-10 ";
+          } else {
+            cellClasses += "bg-slate-700/80 hover:bg-slate-600 text-slate-100 border-slate-600/50 ";
+          }
+
+          const cellEl = document.createElement('div');
+          cellEl.className = cellClasses;
+          cellEl.dataset.r = r;
+          cellEl.dataset.c = c;
+          cellEl.innerText = letter;
+
+          container.appendChild(cellEl);
+        }
+      }
+    }
+
+    function renderWordList() {
+      const container = document.getElementById('wordList');
+      const filtered = state.placedWords.filter(w => {
+        if (state.activeCategory === 'tutte') return true;
+        return w.category === state.activeCategory;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-6 text-slate-400 text-xs font-medium">Nessuna parola in questa categoria.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(w => {
+        const found = w.found;
+        return `
+          <div class="flex items-center justify-between p-2.5 rounded-xl border transition-all ${
+            found 
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-900 line-through opacity-80' 
+              : 'bg-slate-50 border-slate-100 text-slate-800 hover:border-slate-300'
+          }">
+            <div class="flex items-center gap-2 overflow-hidden">
+              <span class="text-base sm:text-lg flex-shrink-0">${w.icon}</span>
+              <div class="truncate">
+                <span class="text-xs font-semibold text-slate-400 mr-1 lowercase italic">${w.article}</span>
+                <span class="font-extrabold text-xs sm:text-sm tracking-wide uppercase">${w.word}</span>
+                <span class="text-[10px] text-slate-400 block -mt-0.5 font-normal truncate">(${w.translation})</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1">
+              ${found ? '<span class="text-emerald-600 font-bold text-sm">✓</span>' : ''}
+              <button onclick="speakWord('${w.article.replace("'", "\\'")} ${w.word}')" title="Ascolta pronuncia" class="p-1.5 hover:bg-slate-200/60 rounded-lg text-slate-500 hover:text-indigo-600 transition-colors">
+                🔊
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateProgress() {
+      const found = state.placedWords.filter(w => w.found).length;
+      const total = state.placedWords.length;
+
+      document.getElementById('foundCount').innerText = found;
+      document.getElementById('totalCount').innerText = total;
+
+      if (found > 0 && found === total) {
+        triggerVictory();
+      }
+    }
+
+    function updateTimerDisplay() {
+      const mins = String(Math.floor(state.timerSeconds / 60)).padStart(2, '0');
+      const secs = String(state.timerSeconds % 60).padStart(2, '0');
+      document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+    }
+
+    // --- INTERACTION & SELECTION LOGIC ---
+    function setupInputListeners() {
+      const gridEl = document.getElementById('grid');
+
+      // Mouse Events
+      gridEl.addEventListener('mousedown', (e) => {
+        const cell = e.target.closest('[data-r]');
+        if (!cell) return;
+        const r = parseInt(cell.dataset.r);
+        const c = parseInt(cell.dataset.c);
+
+        state.isSelecting = true;
+        state.startCell = { r, c };
+        state.currentPath = [{ r, c }];
+        state.tapStartCell = null;
+        renderGrid();
+      });
+
+      gridEl.addEventListener('mousemove', (e) => {
+        if (!state.isSelecting || !state.startCell) return;
+        const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-r]');
+        if (!cell) return;
+
+        const r = parseInt(cell.dataset.r);
+        const c = parseInt(cell.dataset.c);
+
+        const line = getLineCells(state.startCell, { r, c });
+        if (line.length > 0) {
+          state.currentPath = line;
+          renderGrid();
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (state.isSelecting) {
+          finalizeSelection();
+        }
+      });
+
+      // Touch Events
+      gridEl.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        const cell = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('[data-r]');
+        if (!cell) return;
+
+        const r = parseInt(cell.dataset.r);
+        const c = parseInt(cell.dataset.c);
+
+        state.isSelecting = true;
+        state.startCell = { r, c };
+        state.currentPath = [{ r, c }];
+        state.tapStartCell = null;
+        renderGrid();
+      }, { passive: true });
+
+      gridEl.addEventListener('touchmove', (e) => {
+        if (!state.isSelecting || !state.startCell) return;
+        const touch = e.touches[0];
+        const cell = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('[data-r]');
+        if (!cell) return;
+
+        const r = parseInt(cell.dataset.r);
+        const c = parseInt(cell.dataset.c);
+
+        const line = getLineCells(state.startCell, { r, c });
+        if (line.length > 0) {
+          state.currentPath = line;
+          renderGrid();
+        }
+      }, { passive: true });
+
+      gridEl.addEventListener('touchend', () => {
+        if (state.isSelecting) {
+          finalizeSelection();
+        }
+      });
+
+      // Click / Tap Alternative (First click start, second click end)
+      gridEl.addEventListener('click', (e) => {
+        // Handled if drag was minimal
+        const cell = e.target.closest('[data-r]');
+        if (!cell) return;
+        const r = parseInt(cell.dataset.r);
+        const c = parseInt(cell.dataset.c);
+
+        if (!state.tapStartCell) {
+          state.tapStartCell = { r, c };
+          renderGrid();
+        } else {
+          if (state.tapStartCell.r === r && state.tapStartCell.c === c) {
+            state.tapStartCell = null;
+            renderGrid();
+          } else {
+            const line = getLineCells(state.tapStartCell, { r, c });
+            if (line.length > 0) {
+              state.currentPath = line;
+              finalizeSelection();
+            } else {
+              state.tapStartCell = { r, c };
+              renderGrid();
+            }
+          }
+        }
+      });
+    }
+
+    // Interpolate straight line cells
+    function getLineCells(start, end) {
+      const dr = end.r - start.r;
+      const dc = end.c - start.c;
+      const absR = Math.abs(dr);
+      const absC = Math.abs(dc);
+
+      if (dr === 0 || dc === 0 || absR === absC) {
+        const steps = Math.max(absR, absC);
+        const stepR = dr === 0 ? 0 : dr / absR;
+        const stepC = dc === 0 ? 0 : dc / absC;
+
+        const path = [];
+        for (let i = 0; i <= steps; i++) {
+          path.push({
+            r: start.r + i * stepR,
+            c: start.c + i * stepC
+          });
+        }
+        return path;
+      }
+      return [];
+    }
+
+    function finalizeSelection() {
+      state.isSelecting = false;
+      state.startCell = null;
+      state.tapStartCell = null;
+
+      if (state.currentPath.length >= 2) {
+        const selectedStr = state.currentPath.map(pt => state.grid[pt.r][pt.c]).join('');
+        const revStr = selectedStr.split('').reverse().join('');
+
+        // Find match
+        const matchedWord = state.placedWords.find(w => {
+          if (w.found) return false;
+          if (w.word === selectedStr || w.word === revStr) {
+            const directMatch = w.path.every((pt, idx) => pt.r === state.currentPath[idx].r && pt.c === state.currentPath[idx].c);
+            const reverseMatch = w.path.every((pt, idx) => pt.r === state.currentPath[state.currentPath.length - 1 - idx].r && pt.c === state.currentPath[state.currentPath.length - 1 - idx].c);
+            return directMatch || reverseMatch;
+          }
+          return false;
+        });
+
+        if (matchedWord) {
+          matchedWord.found = true;
+          // Apply highlight
+          matchedWord.path.forEach(pt => {
+            state.foundCellsMap[`${pt.r}_${pt.c}`] = matchedWord.color;
+          });
+
+          playAudioTone('found');
+          speakWord(`${matchedWord.article} ${matchedWord.word}`);
+          showToast(`✨ Trovato: ${matchedWord.article.toUpperCase()} ${matchedWord.word}!`, '🎉');
+        }
+      }
+
+      state.currentPath = [];
+      renderGrid();
+      renderWordList();
+      updateProgress();
+    }
+
+    // --- EDUCATIONAL L2 FEATURES ---
+    function giveHint() {
+      const unfound = state.placedWords.filter(w => !w.found);
+      if (unfound.length === 0) return;
+
+      const target = unfound[Math.floor(Math.random() * unfound.length)];
+      const firstLetterCell = target.path[0];
+
+      state.hintedCell = firstLetterCell;
+      renderGrid();
+
+      speakWord(target.word);
+      showToast(`💡 Cerca la prima lettera di "${target.word}" (${target.word[0]})`, '💡');
+
+      setTimeout(() => {
+        state.hintedCell = null;
+        renderGrid();
+      }, 2500);
+    }
+
+    function speakWord(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'it-IT';
+      utterance.rate = 0.85; // Learner friendly speed
+
+      const voices = window.speechSynthesis.getVoices();
+      const itVoice = voices.find(v => v.lang.includes('it'));
+      if (itVoice) utterance.voice = itVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // --- AUDIO SYNTH (Web Audio API) ---
+    function playAudioTone(type) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (type === 'found') {
+          const now = ctx.currentTime;
+          const osc1 = ctx.createOscillator();
+          const osc2 = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc1.type = 'sine';
+          osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(523.25, now); // C5
+          osc2.frequency.setValueAtTime(659.25, now + 0.1); // E5
+
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc1.start(now);
+          osc1.stop(now + 0.1);
+          osc2.start(now + 0.1);
+          osc2.stop(now + 0.35);
+        }
+      } catch (e) {
+        // Fallback gracefully
+      }
+    }
+
+    // --- UI HELPERS & TOAST ---
+    function showToast(message, icon = '💡') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').innerText = message;
+      document.getElementById('toastIcon').innerText = icon;
+
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+
+    function triggerVictory() {
+      clearInterval(state.timerInterval);
+      playAudioTone('win');
+
+      document.getElementById('winTime').innerText = document.getElementById('timerDisplay').innerText;
+      document.getElementById('winWords').innerText = `${state.placedWords.length} / ${state.placedWords.length}`;
+
+      const modal = document.getElementById('winModal');
+      modal.classList.remove('hidden');
+
+      // Confetti animation
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+
+      speakWord("Complimenti! Hai trovato tutte le parole!");
+    }
+
+    function closeWinModal() {
+      document.getElementById('winModal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

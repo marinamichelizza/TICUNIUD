@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DattiloSpeed Pro - Allenatore di Digitazione per la Scuola Secondaria</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Orbitron, Chakra Petch, JetBrains Mono & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Inter:wght@400;600;700;800&family=Orbitron:wght@600;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #060913;
+            color: #f1f5f9;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .font-chakra { font-family: 'Chakra Petch', sans-serif; }
+        .font-mono-code { font-family: 'JetBrains Mono', monospace; }
+
+        /* Effetti Glow e Neon Cyber-Arcade */
+        .glow-cyan { box-shadow: 0 0 25px rgba(6, 182, 212, 0.45), inset 0 0 10px rgba(6, 182, 212, 0.25); }
+        .glow-purple { box-shadow: 0 0 25px rgba(168, 85, 247, 0.45), inset 0 0 10px rgba(168, 85, 247, 0.25); }
+        .glow-emerald { box-shadow: 0 0 25px rgba(16, 185, 129, 0.45), inset 0 0 10px rgba(16, 185, 129, 0.25); }
+        .glow-amber { box-shadow: 0 0 25px rgba(245, 158, 11, 0.45), inset 0 0 10px rgba(245, 158, 11, 0.25); }
+
+        /* Animazione Tasto Target In Evidenza */
+        @keyframes pulse-key {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 15px #06b6d4, inset 0 0 8px #06b6d4;
+                border-color: #38bdf8;
+                background-color: rgba(14, 165, 233, 0.35) !important;
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 0 25px #38bdf8, 0 0 35px #06b6d4, inset 0 0 14px #38bdf8;
+                border-color: #ffffff;
+                background-color: rgba(14, 165, 233, 0.65) !important;
+                color: #ffffff !important;
+            }
+        }
+
+        .key-target {
+            animation: pulse-key 0.7s infinite ease-in-out !important;
+            z-index: 10;
+        }
+
+        .key-pressed-correct {
+            background-color: #10b981 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 22px #10b981 !important;
+            transform: translateY(2px) scale(0.94);
+        }
+
+        .key-pressed-wrong {
+            background-color: #ef4444 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 22px #ef4444 !important;
+            transform: translateY(2px) scale(0.94);
+        }
+
+        /* Codice Colori Guida Ergonomica Dita */
+        .finger-pinky-l { border-color: #c084fc; color: #e9d5ff; }
+        .finger-ring-l  { border-color: #60a5fa; color: #bfdbfe; }
+        .finger-middle-l{ border-color: #4ade80; color: #bbf7d0; }
+        .finger-index-l { border-color: #facc15; color: #fef08a; }
+        .finger-thumb   { border-color: #22d3ee; color: #a5f3fc; }
+        .finger-index-r { border-color: #fb923c; color: #ffedd5; }
+        .finger-middle-r{ border-color: #4ade80; color: #bbf7d0; }
+        .finger-ring-r  { border-color: #60a5fa; color: #bfdbfe; }
+        .finger-pinky-r { border-color: #c084fc; color: #e9d5ff; }
+
+        /* Sfondo Canvas Particelle */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(13, 19, 36, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(13, 19, 36, 0.5); }
+        ::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-cyan-500 selection:text-slate-950">
+
+    <!-- Canvas Sfondo Spaziale Animato -->
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="relative z-10 flex flex-col min-h-screen">
+        
+        <!-- HEADER / BARRA SUPERIORE -->
+        <header class="glass-panel border-b border-cyan-500/30 px-4 py-3 sticky top-0 z-30 shadow-2xl">
+            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+                
+                <!-- Logo & Titolo -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 font-orbitron font-extrabold text-2xl text-white">
+                        ⚡
+                    </div>
+                    <div>
+                        <h1 class="font-orbitron font-extrabold text-xl sm:text-2xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400">
+                            DATTILO<span class="text-amber-400">SPEED</span> <span class="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">PRO</span>
+                        </h1>
+                        <p class="text-xs text-slate-400 hidden sm:block">Scuola Secondaria di I Grado • Dattilografia 26 Lettere (A-Z)</p>
+                    </div>
+                </div>
+
+                <!-- Info Studente Corrente & Controlli -->
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <div id="user-pill" class="hidden px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-300">
+                        👤 <span id="user-display-name" class="font-bold text-cyan-300">Studente</span> <span id="user-display-class" class="text-slate-400">(-)</span>
+                    </div>
+
+                    <button id="btn-sound" onclick="toggleAudio()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold border border-slate-700 transition flex items-center gap-1.5">
+                        <span id="sound-icon">🔊</span> <span class="hidden md:inline" id="sound-text">Audio ON</span>
+                    </button>
+
+                    <button id="btn-guide" onclick="openGuideModal()" class="px-3 py-1.5 rounded-lg bg-indigo-950/80 hover:bg-indigo-900/80 text-indigo-300 text-xs sm:text-sm font-semibold border border-indigo-500/40 transition flex items-center gap-1.5">
+                        <span>🖐️</span> <span class="hidden md:inline">Guida Dita</span>
+                    </button>
+
+                    <button id="btn-menu" onclick="returnToSetup()" class="hidden px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs sm:text-sm font-semibold border border-amber-500/40 transition">
+                        ⚙️ <span class="hidden md:inline">Setup</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENUTO PRINCIPALE -->
+        <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 flex flex-col justify-between gap-4">
+
+            <!-- PANNELLO 1: SETUP ESERCIZIO -->
+            <div id="setup-screen" class="glass-panel p-6 sm:p-8 rounded-3xl border border-cyan-500/30 shadow-2xl max-w-4xl mx-auto w-full my-auto">
+                <div class="text-center mb-6">
+                    <h2 class="font-orbitron font-extrabold text-2xl sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400 mb-2">
+                        CONFIGURA L'ESERCIZIO
+                    </h2>
+                    <p class="text-slate-300 text-sm max-w-xl mx-auto">
+                        Migliora la tua velocità e precisione su tutte le <strong class="text-cyan-300">26 lettere dell'alfabeto</strong> (incluse <strong class="text-yellow-400">X, Y, J, K, W</strong>). Metti le dita sui tasti base <strong class="text-yellow-400">F</strong> e <strong class="text-orange-400">J</strong>!
+                    </p>
+                </div>
+
+                <form id="setup-form" onsubmit="handleStartGame(event)" class="space-y-6">
+                    
+                    <!-- Dati Studente -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2">Nome e Cognome Studente (opzionale)</label>
+                            <input type="text" id="input-student-name" placeholder="Es. Marco Rossi" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2">Classe / Sezione (opzionale)</label>
+                            <input type="text" id="input-student-class" placeholder="Es. 2ª C" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Durata Timer -->
+                    <div>
+                        <label class="block text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2">Durata Timer (Secondi)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                            <button type="button" onclick="selectTimerPreset(30, this)" class="timer-btn bg-slate-900 border border-slate-700 py-2.5 rounded-xl font-mono text-sm font-bold hover:border-cyan-400 transition">30s</button>
+                            <button type="button" onclick="selectTimerPreset(60, this)" class="timer-btn active-timer bg-cyan-500/20 border-2 border-cyan-400 text-cyan-300 py-2.5 rounded-xl font-mono text-sm font-bold transition">60s (Standard)</button>
+                            <button type="button" onclick="selectTimerPreset(90, this)" class="timer-btn bg-slate-900 border border-slate-700 py-2.5 rounded-xl font-mono text-sm font-bold hover:border-cyan-400 transition">90s</button>
+                            <button type="button" onclick="selectTimerPreset(120, this)" class="timer-btn bg-slate-900 border border-slate-700 py-2.5 rounded-xl font-mono text-sm font-bold hover:border-cyan-400 transition">120s</button>
+                            
+                            <div class="col-span-2 sm:col-span-1 flex items-center bg-slate-900 border border-slate-700 rounded-xl px-2">
+                                <input type="number" id="input-custom-timer" min="10" max="300" placeholder="Custom" oninput="selectCustomTimer(this.value)" class="w-full bg-transparent text-center font-mono text-sm font-bold text-cyan-300 focus:outline-none">
+                                <span class="text-xs text-slate-500 pr-1">s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Livelli di Difficoltà dell'Esercizio -->
+                    <div>
+                        <label class="block text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2">Livello Difficoltà Contenuti</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            
+                            <label class="diff-card cursor-pointer p-3.5 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-cyan-400 transition flex items-start gap-3">
+                                <input type="radio" name="difficulty" value="1" checked class="mt-1 accent-cyan-400">
+                                <div>
+                                    <div class="font-bold text-sm text-cyan-300">Livello 1: Singole Lettere</div>
+                                    <div class="text-xs text-slate-400 mt-0.5">Tutte le 26 lettere dell'alfabeto (A-Z comprese X, Y, J, K, W).</div>
+                                </div>
+                            </label>
+
+                            <label class="diff-card cursor-pointer p-3.5 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-cyan-400 transition flex items-start gap-3">
+                                <input type="radio" name="difficulty" value="2" class="mt-1 accent-cyan-400">
+                                <div>
+                                    <div class="font-bold text-sm text-purple-300">Livello 2: Coppie di Lettere</div>
+                                    <div class="text-xs text-slate-400 mt-0.5">Combinazioni di 2 lettere (WA, KO, XY, JU, KE, XI, CH, GL, GN, QU, SC...).</div>
+                                </div>
+                            </label>
+
+                            <label class="diff-card cursor-pointer p-3.5 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-cyan-400 transition flex items-start gap-3">
+                                <input type="radio" name="difficulty" value="3" class="mt-1 accent-cyan-400">
+                                <div>
+                                    <div class="font-bold text-sm text-emerald-300">Livello 3: Parole Bisillabe</div>
+                                    <div class="text-xs text-slate-400 mt-0.5">Parole da 2 sillabe (TAXI, YOGA, KIWI, WAFER, JEANS, CASA, MARE, LUNA...).</div>
+                                </div>
+                            </label>
+
+                            <label class="diff-card cursor-pointer p-3.5 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-cyan-400 transition flex items-start gap-3">
+                                <input type="radio" name="difficulty" value="4" class="mt-1 accent-cyan-400">
+                                <div>
+                                    <div class="font-bold text-sm text-amber-300">Livello 4: Parole Trisillabe</div>
+                                    <div class="text-xs text-slate-400 mt-0.5">Parole da 3 sillabe (KARATE, JOGGING, KIMONO, KEBAB, TAXISTA, SCUOLA...).</div>
+                                </div>
+                            </label>
+
+                        </div>
+                    </div>
+
+                    <!-- Modalità di Velocità -->
+                    <div>
+                        <label class="block text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2">Livello di Velocità & Ritmo</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <label class="cursor-pointer p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-cyan-400 transition text-center">
+                                <input type="radio" name="speed" value="base" checked class="hidden peer">
+                                <div class="peer-checked:text-cyan-300 peer-checked:font-bold text-xs">🟢 Base (Relax)</div>
+                            </label>
+                            <label class="cursor-pointer p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-cyan-400 transition text-center">
+                                <input type="radio" name="speed" value="media" class="hidden peer">
+                                <div class="peer-checked:text-cyan-300 peer-checked:font-bold text-xs">🟡 Media</div>
+                            </label>
+                            <label class="cursor-pointer p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-cyan-400 transition text-center">
+                                <input type="radio" name="speed" value="veloce" class="hidden peer">
+                                <div class="peer-checked:text-cyan-300 peer-checked:font-bold text-xs">🔴 Veloce</div>
+                            </label>
+                            <label class="cursor-pointer p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-cyan-400 transition text-center">
+                                <input type="radio" name="speed" value="dinamica" class="hidden peer">
+                                <div class="peer-checked:text-amber-300 peer-checked:font-bold text-xs">⚡ Crescente / Progressiva</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Pulsante Avvio -->
+                    <button type="submit" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-orbitron font-extrabold text-lg tracking-wider shadow-xl shadow-cyan-500/20 transition transform hover:-translate-y-0.5 active:translate-y-0">
+                        🚀 AVVIA LA SESSIONE DATTILOSPEED PRO
+                    </button>
+                </form>
+            </div>
+
+
+            <!-- PANNELLO 2: AREA DI GIOCO -->
+            <div id="game-screen" class="hidden flex flex-col justify-between gap-4">
+                
+                <!-- HUD STATISTICHE LIVE -->
+                <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 sm:gap-3 text-center">
+                    
+                    <!-- Timer -->
+                    <div class="glass-panel p-2.5 rounded-2xl border border-rose-500/30">
+                        <div class="text-[10px] uppercase tracking-widest text-rose-400 font-bold">Tempo</div>
+                        <div id="hud-timer" class="font-orbitron text-xl sm:text-3xl font-black text-rose-300">60s</div>
+                    </div>
+
+                    <!-- Punteggio -->
+                    <div class="glass-panel p-2.5 rounded-2xl border border-cyan-500/30">
+                        <div class="text-[10px] uppercase tracking-widest text-cyan-400 font-bold">Punti</div>
+                        <div id="hud-score" class="font-orbitron text-xl sm:text-3xl font-black text-white">0</div>
+                    </div>
+
+                    <!-- Accuratezza -->
+                    <div class="glass-panel p-2.5 rounded-2xl border border-amber-500/30">
+                        <div class="text-[10px] uppercase tracking-widest text-amber-400 font-bold">Accuratezza</div>
+                        <div id="hud-accuracy" class="font-orbitron text-xl sm:text-3xl font-black text-amber-300">100%</div>
+                    </div>
+
+                    <!-- WPM -->
+                    <div class="glass-panel p-2.5 rounded-2xl border border-emerald-500/30">
+                        <div class="text-[10px] uppercase tracking-widest text-emerald-400 font-bold">WPM (Parole/m)</div>
+                        <div id="hud-wpm" class="font-orbitron text-xl sm:text-3xl font-black text-emerald-300">0</div>
+                    </div>
+
+                    <!-- CPM -->
+                    <div class="glass-panel p-2.5 rounded-2xl border border-blue-500/30">
+                        <div class="text-[10px] uppercase tracking-widest text-blue-400 font-bold">CPM (Caratteri/m)</div>
+                        <div id="hud-cpm" class="font-orbitron text-xl sm:text-3xl font-black text-blue-300">0</div>
+                    </div>
+
+                    <!-- Combo -->
+                    <div class="glass-panel p-2.5 rounded-2xl border border-purple-500/30 col-span-2 sm:col-span-1">
+                        <div class="text-[10px] uppercase tracking-widest text-purple-400 font-bold">Combo</div>
+                        <div id="hud-combo" class="font-orbitron text-xl sm:text-3xl font-black text-purple-300">x1</div>
+                    </div>
+                </div>
+
+                <!-- STAGE PRINCIPALE DIGITAZIONE -->
+                <div class="glass-panel rounded-3xl border border-cyan-500/40 p-6 sm:p-10 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl min-h-[260px]">
+                    
+                    <!-- Badge Info Livello & Velocità -->
+                    <div class="absolute top-4 left-4 right-4 flex flex-wrap justify-between items-center text-xs text-slate-400 gap-2">
+                        <span id="game-level-badge" class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40">
+                            Livello 1: Singole Lettere (26 Lettere)
+                        </span>
+                        <span id="game-speed-badge" class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
+                            Velocità: Base
+                        </span>
+                    </div>
+
+                    <!-- Elemento Corrente da Digitare -->
+                    <div class="my-6 text-center">
+                        <div id="current-word-display" class="font-mono-code text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-widest text-slate-400 bg-slate-950/80 px-8 py-4 rounded-2xl border border-slate-700 shadow-inner inline-block">
+                            <!-- Popolato via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Coda delle Prossime Parole -->
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="text-xs uppercase tracking-wider text-slate-500 font-bold">Prossimi elementi:</span>
+                        <div id="queue-display" class="flex gap-2">
+                            <!-- Popolato via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Overlay Notifiche Toast -->
+                    <div id="toast-container" class="absolute inset-0 pointer-events-none flex items-center justify-center z-20"></div>
+                </div>
+
+                <!-- TASTIERA VIRTUALE INTERATTIVA COMPLETA -->
+                <div class="glass-panel p-3 sm:p-5 rounded-3xl border border-slate-800 shadow-2xl relative">
+                    
+                    <!-- Header Tastiera & Legenda Dita -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3 px-2">
+                        <div class="text-xs font-bold text-slate-400 flex items-center gap-2">
+                            <span>⌨️ GUIDA ERGONOMICA PER LE DITA</span>
+                            <span id="caps-warning" class="hidden text-amber-400 text-[11px] font-semibold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">⚠️ Caps Lock Attivo</span>
+                        </div>
+                        
+                        <!-- Legenda Dita Colorate -->
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] font-medium">
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Mignolo</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Anulare</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-green-400"></span> Medio</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span> Indice SX</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-orange-400"></span> Indice DX</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Pollici</span>
+                        </div>
+                    </div>
+
+                    <!-- Grid Tasti QWERTY (Inclusi X, Y, J, K, W) -->
+                    <div class="space-y-1.5 text-xs sm:text-sm font-bold font-mono">
+                        
+                        <!-- Row 1: Numeri -->
+                        <div class="flex justify-center gap-1">
+                            <div data-key="1" class="key finger-pinky-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">1</div>
+                            <div data-key="2" class="key finger-ring-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">2</div>
+                            <div data-key="3" class="key finger-middle-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">3</div>
+                            <div data-key="4" class="key finger-index-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">4</div>
+                            <div data-key="5" class="key finger-index-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">5</div>
+                            <div data-key="6" class="key finger-index-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">6</div>
+                            <div data-key="7" class="key finger-index-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">7</div>
+                            <div data-key="8" class="key finger-middle-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">8</div>
+                            <div data-key="9" class="key finger-ring-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">9</div>
+                            <div data-key="0" class="key finger-pinky-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">0</div>
+                        </div>
+
+                        <!-- Row 2: QWERTY (Include W, Y) -->
+                        <div class="flex justify-center gap-1">
+                            <div data-key="Q" class="key finger-pinky-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">Q</div>
+                            <div data-key="W" class="key finger-ring-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">W</div>
+                            <div data-key="E" class="key finger-middle-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">E</div>
+                            <div data-key="R" class="key finger-index-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">R</div>
+                            <div data-key="T" class="key finger-index-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">T</div>
+                            <div data-key="Y" class="key finger-index-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">Y</div>
+                            <div data-key="U" class="key finger-index-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">U</div>
+                            <div data-key="I" class="key finger-middle-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">I</div>
+                            <div data-key="O" class="key finger-ring-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">O</div>
+                            <div data-key="P" class="key finger-pinky-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">P</div>
+                        </div>
+
+                        <!-- Row 3: ASDFGHJKL (Include J, K e punti guida) -->
+                        <div class="flex justify-center gap-1">
+                            <div data-key="A" class="key finger-pinky-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">A</div>
+                            <div data-key="S" class="key finger-ring-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">S</div>
+                            <div data-key="D" class="key finger-middle-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">D</div>
+                            <div data-key="F" class="key finger-index-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center relative">F<span class="absolute bottom-0.5 text-[8px] text-yellow-400 font-black">•</span></div>
+                            <div data-key="G" class="key finger-index-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">G</div>
+                            <div data-key="H" class="key finger-index-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">H</div>
+                            <div data-key="J" class="key finger-index-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center relative">J<span class="absolute bottom-0.5 text-[8px] text-orange-400 font-black">•</span></div>
+                            <div data-key="K" class="key finger-middle-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">K</div>
+                            <div data-key="L" class="key finger-ring-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">L</div>
+                        </div>
+
+                        <!-- Row 4: ZXCVBNM (Include X) -->
+                        <div class="flex justify-center gap-1">
+                            <div data-key="Z" class="key finger-pinky-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">Z</div>
+                            <div data-key="X" class="key finger-ring-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">X</div>
+                            <div data-key="C" class="key finger-middle-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">C</div>
+                            <div data-key="V" class="key finger-index-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">V</div>
+                            <div data-key="B" class="key finger-index-l w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">B</div>
+                            <div data-key="N" class="key finger-index-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">N</div>
+                            <div data-key="M" class="key finger-index-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">M</div>
+                            <div data-key="," class="key finger-middle-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">,</div>
+                            <div data-key="." class="key finger-ring-r w-7 sm:w-10 h-9 sm:h-11 rounded-xl bg-slate-900 border-2 flex items-center justify-center">.</div>
+                        </div>
+
+                        <!-- Row 5: Barra Spaziatrice -->
+                        <div class="flex justify-center gap-1 pt-1">
+                            <div data-key=" " class="key finger-thumb w-48 sm:w-72 h-8 sm:h-10 rounded-xl bg-slate-900 border-2 flex items-center justify-center text-xs tracking-widest">BARRA SPAZIATRICE</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="text-center py-3 text-xs text-slate-500 border-t border-slate-900">
+            DattiloSpeed Pro • Piattaforma Educational per la Scuola Secondaria di Primo Grado ⚡
+        </footer>
+    </div>
+
+    <!-- MODALE RISULTATI E DOWNLOAD REPORT -->
+    <div id="results-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md hidden">
+        <div class="glass-panel max-w-lg w-full rounded-3xl border border-cyan-500/50 p-6 sm:p-8 text-center shadow-2xl relative max-h-[92vh] overflow-y-auto">
+            
+            <!-- Valutazione Stelle -->
+            <div id="res-stars" class="text-3xl sm:text-4xl mb-1 tracking-widest">
+                ⭐⭐⭐⭐⭐
+            </div>
+
+            <h2 id="res-title" class="font-orbitron font-extrabold text-2xl sm:text-3xl text-amber-400">
+                SESSIONE COMPLETATA!
+            </h2>
+            <p id="res-badge" class="font-chakra text-sm sm:text-base font-bold text-cyan-300 mb-4">
+                Badge: 🏆 Dito da Record
+            </p>
+
+            <!-- Griglia Risultati Analitici -->
+            <div class="grid grid-cols-2 gap-3 mb-4 text-left">
+                <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold">Punteggio Finale</span>
+                    <div id="res-score" class="font-orbitron text-xl font-bold text-white">0</div>
+                </div>
+                <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold">Accuratezza</span>
+                    <div id="res-accuracy" class="font-orbitron text-xl font-bold text-amber-300">100%</div>
+                </div>
+                <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold">WPM (Parole/m)</span>
+                    <div id="res-wpm" class="font-orbitron text-xl font-bold text-emerald-400">0</div>
+                </div>
+                <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold">CPM (Caratteri/m)</span>
+                    <div id="res-cpm" class="font-orbitron text-xl font-bold text-blue-400">0</div>
+                </div>
+                <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold">Caratteri Corretti</span>
+                    <div id="res-correct" class="font-orbitron text-lg font-bold text-slate-200">0</div>
+                </div>
+                <div class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold">Errori Totali</span>
+                    <div id="res-errors" class="font-orbitron text-lg font-bold text-rose-400">0</div>
+                </div>
+            </div>
+
+            <!-- Box Tasti Più Sbagliati -->
+            <div id="missed-keys-box" class="bg-slate-900/80 p-3 rounded-2xl border border-slate-800 text-left mb-6">
+                <span class="text-xs text-rose-400 uppercase font-semibold block mb-1">🎯 Lettere da esercitare:</span>
+                <div id="missed-keys-list" class="text-xs text-slate-300 flex flex-wrap gap-1.5">
+                    Nessun errore significativo! Digitazione impeccabile!
+                </div>
+            </div>
+
+            <!-- Pulsanti Azione (Download Report + Rigioca) -->
+            <div class="space-y-3">
+                <button onclick="downloadScoreReport()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-orbitron font-extrabold text-sm tracking-wide shadow-lg transition flex items-center justify-center gap-2">
+                    📥 SCARICA REPORT PUNTEGGIO (.TXT)
+                </button>
+                
+                <div class="flex gap-3">
+                    <button onclick="restartCurrentGame()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs border border-cyan-500/30 transition">
+                        🔄 RIGIOCA
+                    </button>
+                    <button onclick="returnToSetup()" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold text-xs border border-purple-500/30 transition">
+                        ⚙️ CAMBIA SETUP
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODALE GUIDA TOUCH TYPING -->
+    <div id="guide-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md hidden">
+        <div class="glass-panel max-w-2xl w-full rounded-3xl border border-indigo-500/50 p-6 text-left shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeGuideModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">✕</button>
+            
+            <h2 class="font-orbitron font-extrabold text-2xl text-indigo-400 mb-2 flex items-center gap-2">
+                🖐️ Guida alla Digitazione a 10 Dita (26 Lettere)
+            </h2>
+            <p class="text-xs text-slate-300 mb-4">
+                Padroneggia l'intera tastiera compresi i tasti speciali <strong class="text-yellow-400">X, Y, J, K, W</strong> senza guardare le dita!
+            </p>
+
+            <div class="space-y-4 text-xs sm:text-sm text-slate-300">
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                    <h3 class="font-bold text-yellow-400 text-sm mb-1">1. Posizione Base (Home Row)</h3>
+                    <ul class="list-disc list-inside mt-1 space-y-1 text-slate-400">
+                        <li><strong class="text-purple-300">Mignoli:</strong> Tasto A (SX) e Tasto L (DX)</li>
+                        <li><strong class="text-blue-300">Anulari:</strong> Tasto S (SX) e Tasto K (DX)</li>
+                        <li><strong class="text-green-300">Medii:</strong> Tasto D (SX) e Tasto J (DX)</li>
+                        <li><strong class="text-yellow-300">Indici:</strong> Tasto F (SX) e Tasto J (DX) - <em>Trova i trattini in rilievo!</em></li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                    <h3 class="font-bold text-cyan-400 text-sm mb-1">2. Posizione Lettere Estese (X, Y, J, K, W)</h3>
+                    <ul class="list-disc list-inside mt-1 space-y-1 text-slate-400">
+                        <li><strong class="text-blue-300">Tasto W:</strong> Anulare sinistro (sale verso l'alto da S).</li>
+                        <li><strong class="text-orange-300">Tasto Y:</strong> Indice destro (sale verso l'alto a sinistra da J).</li>
+                        <li><strong class="text-orange-300">Tasto J:</strong> Indice destro (posizione base con il trattino).</li>
+                        <li><strong class="text-green-300">Tasto K:</strong> Medio destro (posizione base).</li>
+                        <li><strong class="text-blue-300">Tasto X:</strong> Anulare sinistro (scende verso il basso da S).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button onclick="closeGuideModal()" class="w-full mt-6 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-slate-950 font-black text-sm tracking-wide transition">
+                HO CAPITO! INIZIA L'ESERCIZIO
+            </button>
+        </div>
+    </div>
+
+
+    <!-- JAVASCRIPT GESTIONE APPLICAZIONE -->
+    <script>
+        /* ==========================================================================
+           DATASET COMPLETO A 26 LETTERE (COMPRESE X, Y, J, K, W)
+           ========================================================================== */
+
+        // Livello 1: Tutte le 26 lettere dell'alfabeto (A-Z)
+        const DATASET_LEVEL_1 = [
+            "A","B","C","D","E","F","G","H","I","J","K","L","M",
+            "N","O","P","Q","R","S","T","U","V","W","X","Y","Z"
+        ];
+
+        // Livello 2: Coppie di lettere comprese combinazioni con X, Y, J, K, W
+        const DATASET_LEVEL_2 = [
+            "WA","KO","XY","JU","KE","XI","WO","YE","JK","WX","CH","GL",
+            "GN","QU","SC","TR","PR","ST","BR","CR","DR","FR","GR","PL",
+            "BL","CL","FL","MB","MP","DA","LI","FI","CO","MA","PA","SE",
+            "RA","NI","TE","RO","CA","VE","ZI","BO","PU","LU","MI","SO"
+        ];
+
+        // Livello 3: Parole Bisillabe comprese parole con X, Y, J, K, W
+        const DATASET_LEVEL_3 = [
+            "TAXI", "YOGA", "KIWI", "WAFER", "JEANS", "JUBO", "WIFI", "KUDO",
+            "CASA", "MARE", "SOLE", "PANE", "LUNA", "LIBRO", "MANO", "ROSA",
+            "MONTE", "VENTO", "VISO", "GATTO", "CANE", "PERO", "LAGO", "MURA",
+            "NAVE", "PACCO", "RANA", "TAZZA", "BICI", "BENE", "CORO", "DATO",
+            "FATA", "GELO", "ISOLA", "MOTO", "ZAINO"
+        ];
+
+        // Livello 4: Parole Trisillabe comprese parole con X, Y, J, K, W
+        const DATASET_LEVEL_4 = [
+            "KARATE", "JOGGING", "KIMONO", "KEBAB", "TAXISTA", "KILOBYTE", "WATTMAN",
+            "SCUOLA", "MATITA", "MUSICA", "TAVOLO", "ESTATE", "ALBERO", "GELATO",
+            "STELLA", "MATERIA", "MATTONE", "DIVANO", "GIARDINO", "COMPUTER", "QUADERNO",
+            "FINESTRA", "MATTINA", "FARFALLA", "VULCANO", "CASTELLO", "PAGINA", "METEORA",
+            "PENGUINO", "BOTTIGLIA", "QUADRO", "MONTAGNA", "SIMBOLO"
+        ];
+
+        /* ==========================================================================
+           STATO APPLICAZIONE
+           ========================================================================== */
+        let gameConfig = {
+            studentName: "",
+            studentClass: "",
+            timerSeconds: 60,
+            difficulty: 1, // 1, 2, 3, 4
+            speedMode: "base" // base, media, veloce, dinamica
+        };
+
+        let gameState = {
+            active: false,
+            score: 0,
+            combo: 1,
+            maxCombo: 1,
+            timeLeft: 60,
+            totalKeyPresses: 0,
+            correctKeyPresses: 0,
+            totalErrors: 0,
+            startTime: null,
+            timerInterval: null,
+            audioEnabled: true,
+            missedKeys: {}, // { 'X': 2, 'W': 1 }
+            
+            currentWord: "",
+            currentCharIndex: 0,
+            wordQueue: [],
+            
+            speedMultiplier: 1.0,
+            perfectCountInRow: 0
+        };
+
+        /* ==========================================================================
+           SINTETIZZATORE AUDIO (Web Audio API)
+           ========================================================================== */
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!gameState.audioEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'hit') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.06);
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.06);
+            } 
+            else if (type === 'error') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(140, now);
+                osc.frequency.linearRampToValueAtTime(90, now + 0.12);
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.12);
+            }
+            else if (type === 'combo') {
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.04);
+                    gain.gain.setValueAtTime(0.1, now + i * 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.04 + 0.08);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + i * 0.04);
+                    osc.stop(now + i * 0.04 + 0.08);
+                });
+            }
+            else if (type === 'win') {
+                [440, 554.37, 659.25, 880].forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                    gain.gain.setValueAtTime(0.15, now + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.2);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + i * 0.08);
+                    osc.stop(now + i * 0.08 + 0.2);
+                });
+            }
+        }
+
+        function toggleAudio() {
+            gameState.audioEnabled = !gameState.audioEnabled;
+            document.getElementById('sound-text').textContent = gameState.audioEnabled ? "Audio ON" : "Audio OFF";
+            document.getElementById('sound-icon').textContent = gameState.audioEnabled ? "🔊" : "🔇";
+        }
+
+        /* ==========================================================================
+           CONTROLLI SETUP
+           ========================================================================== */
+        function selectTimerPreset(seconds, btnEl) {
+            document.querySelectorAll('.timer-btn').forEach(b => {
+                b.classList.remove('active-timer', 'bg-cyan-500/20', 'border-2', 'border-cyan-400', 'text-cyan-300');
+                b.classList.add('bg-slate-900', 'border-slate-700');
+            });
+            btnEl.classList.remove('bg-slate-900', 'border-slate-700');
+            btnEl.classList.add('active-timer', 'bg-cyan-500/20', 'border-2', 'border-cyan-400', 'text-cyan-300');
+            
+            document.getElementById('input-custom-timer').value = '';
+            gameConfig.timerSeconds = seconds;
+        }
+
+        function selectCustomTimer(val) {
+            const num = parseInt(val);
+            if (!isNaN(num) && num >= 10 && num <= 300) {
+                document.querySelectorAll('.timer-btn').forEach(b => {
+                    b.classList.remove('active-timer', 'bg-cyan-500/20', 'border-2', 'border-cyan-400', 'text-cyan-300');
+                    b.classList.add('bg-slate-900', 'border-slate-700');
+                });
+                gameConfig.timerSeconds = num;
+            }
+        }
+
+        function handleStartGame(e) {
+            e.preventDefault();
+
+            gameConfig.studentName = document.getElementById('input-student-name').value.trim();
+            gameConfig.studentClass = document.getElementById('input-student-class').value.trim();
+            gameConfig.difficulty = parseInt(document.querySelector('input[name="difficulty"]:checked').value);
+            gameConfig.speedMode = document.querySelector('input[name="speed"]:checked').value;
+
+            // Aggiorna Badge Pill Header
+            if (gameConfig.studentName) {
+                document.getElementById('user-display-name').textContent = gameConfig.studentName;
+                document.getElementById('user-display-class').textContent = gameConfig.studentClass ? `(${gameConfig.studentClass})` : '';
+                document.getElementById('user-pill').classList.remove('hidden');
+            } else {
+                document.getElementById('user-pill').classList.add('hidden');
+            }
+
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('btn-menu').classList.remove('hidden');
+
+            initGameSession();
+        }
+
+        function returnToSetup() {
+            gameState.active = false;
+            clearInterval(gameState.timerInterval);
+            setTargetKeyHighlight(null);
+
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('results-modal').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+            document.getElementById('btn-menu').classList.add('hidden');
+        }
+
+        /* ==========================================================================
+           SESSIONE DI GIOCO
+           ========================================================================== */
+        function getDatasetByDifficulty(diff) {
+            switch(diff) {
+                case 1: return DATASET_LEVEL_1;
+                case 2: return DATASET_LEVEL_2;
+                case 3: return DATASET_LEVEL_3;
+                case 4: return DATASET_LEVEL_4;
+                default: return DATASET_LEVEL_1;
+            }
+        }
+
+        function getRandomItemFromDataset() {
+            const dataset = getDatasetByDifficulty(gameConfig.difficulty);
+            return dataset[Math.floor(Math.random() * dataset.length)];
+        }
+
+        function initGameSession() {
+            gameState.active = true;
+            gameState.score = 0;
+            gameState.combo = 1;
+            gameState.maxCombo = 1;
+            gameState.timeLeft = gameConfig.timerSeconds;
+            gameState.totalKeyPresses = 0;
+            gameState.correctKeyPresses = 0;
+            gameState.totalErrors = 0;
+            gameState.startTime = Date.now();
+            gameState.missedKeys = {};
+            gameState.speedMultiplier = 1.0;
+            gameState.perfectCountInRow = 0;
+
+            // Inizializza coda parole
+            gameState.wordQueue = [];
+            for (let i = 0; i < 5; i++) {
+                gameState.wordQueue.push(getRandomItemFromDataset());
+            }
+
+            nextWordInQueue();
+            updateHUD();
+
+            // Aggiorna Badge del Livello
+            const diffLabels = ["", "Livello 1: Singole Lettere (26 Lettere A-Z)", "Livello 2: Coppie di Lettere", "Livello 3: Parole Bisillabe", "Livello 4: Parole Trisillabe"];
+            document.getElementById('game-level-badge').textContent = diffLabels[gameConfig.difficulty];
+
+            updateSpeedBadge();
+
+            // Timer alla rovescia
+            clearInterval(gameState.timerInterval);
+            gameState.timerInterval = setInterval(() => {
+                gameState.timeLeft--;
+                document.getElementById('hud-timer').textContent = gameState.timeLeft + "s";
+                
+                // In modalità dinamica/progressiva la velocità aumenta gradualmente ogni 10s
+                if (gameConfig.speedMode === 'dinamica' && gameState.timeLeft % 10 === 0) {
+                    gameState.speedMultiplier += 0.05;
+                    updateSpeedBadge();
+                }
+
+                if (gameState.timeLeft <= 0) {
+                    endGameSession();
+                }
+            }, 1000);
+        }
+
+        function updateSpeedBadge() {
+            const speedNames = { base: "Base", media: "Media", veloce: "Veloce", dinamica: `Crescente (x${gameState.speedMultiplier.toFixed(2)})` };
+            document.getElementById('game-speed-badge').textContent = "Ritmo: " + speedNames[gameConfig.speedMode];
+        }
+
+        function nextWordInQueue() {
+            gameState.currentWord = gameState.wordQueue.shift();
+            gameState.wordQueue.push(getRandomItemFromDataset());
+            gameState.currentCharIndex = 0;
+
+            renderCurrentWordDisplay();
+            renderQueueDisplay();
+        }
+
+        function renderCurrentWordDisplay() {
+            const word = gameState.currentWord;
+            const idx = gameState.currentCharIndex;
+
+            let html = "";
+            for (let i = 0; i < word.length; i++) {
+                const char = word[i];
+                if (i < idx) {
+                    html += `<span class="text-emerald-400 font-black">${char}</span>`;
+                } else if (i === idx) {
+                    html += `<span class="bg-cyan-500 text-slate-950 font-black px-1.5 rounded animate-pulse">${char}</span>`;
+                } else {
+                    html += `<span class="text-slate-500">${char}</span>`;
+                }
+            }
+
+            document.getElementById('current-word-display').innerHTML = html;
+
+            // Evidenzia il prossimo tasto da premere
+            const targetChar = word[idx];
+            setTargetKeyHighlight(targetChar);
+        }
+
+        function renderQueueDisplay() {
+            const queueEl = document.getElementById('queue-display');
+            queueEl.innerHTML = gameState.wordQueue.slice(0, 4).map(w => 
+                `<span class="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-700 text-xs font-mono text-slate-400">${w}</span>`
+            ).join('');
+        }
+
+        /* ==========================================================================
+           GESTIONE INPUT TASTIERA FISICA
+           ========================================================================== */
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.altKey || e.metaKey || e.key === 'Tab' || e.key === 'CapsLock') return;
+
+            // Warning CapsLock
+            const capsWarning = document.getElementById('caps-warning');
+            if (e.getModifierState && e.getModifierState('CapsLock')) {
+                capsWarning.classList.remove('hidden');
+            } else {
+                capsWarning.classList.add('hidden');
+            }
+
+            if (!gameState.active) return;
+
+            const pressedKey = e.key;
+            if (pressedKey === ' ') e.preventDefault();
+
+            gameState.totalKeyPresses++;
+
+            const targetChar = gameState.currentWord[gameState.currentCharIndex];
+
+            if (pressedKey.toUpperCase() === targetChar.toUpperCase()) {
+                // Tasto Corretto
+                gameState.correctKeyPresses++;
+                gameState.currentCharIndex++;
+                
+                // Calcolo punti base + moltiplicatore combo/velocità
+                const basePoints = 10 * Math.round(gameState.speedMultiplier);
+                gameState.score += basePoints * gameState.combo;
+                gameState.combo++;
+                if (gameState.combo > gameState.maxCombo) gameState.maxCombo = gameState.combo;
+
+                animateKeyPress(pressedKey, true);
+                playSound('hit');
+
+                if (gameState.combo % 5 === 0) {
+                    playSound('combo');
+                    showToast(`COMBO x${gameState.combo}! 🔥`, "text-amber-400");
+                }
+
+                // Parola completata
+                if (gameState.currentCharIndex >= gameState.currentWord.length) {
+                    gameState.perfectCountInRow++;
+                    if (gameConfig.speedMode === 'dinamica' && gameState.perfectCountInRow % 5 === 0) {
+                        gameState.speedMultiplier += 0.1;
+                        updateSpeedBadge();
+                        showToast(`RITMO AUMENTATO! ⚡`, "text-cyan-400");
+                    }
+                    nextWordInQueue();
+                } else {
+                    renderCurrentWordDisplay();
+                }
+
+            } else {
+                // Tasto Errato
+                gameState.totalErrors++;
+                gameState.combo = 1;
+                gameState.perfectCountInRow = 0;
+
+                const wrongChar = targetChar.toUpperCase();
+                gameState.missedKeys[wrongChar] = (gameState.missedKeys[wrongChar] || 0) + 1;
+
+                animateKeyPress(pressedKey, false);
+                playSound('error');
+            }
+
+            updateHUD();
+        });
+
+        /* ==========================================================================
+           EVIDENZIAZIONE E ANIMAZIONE TASTIERA VIRTUALE
+           ========================================================================== */
+        function setTargetKeyHighlight(char) {
+            document.querySelectorAll('.key-target').forEach(el => el.classList.remove('key-target'));
+            if (!char) return;
+
+            let keyChar = char.toUpperCase();
+            if (keyChar === ' ') keyChar = ' ';
+
+            const targetEl = document.querySelector(`.key[data-key="${keyChar}"]`);
+            if (targetEl) {
+                targetEl.classList.add('key-target');
+            }
+        }
+
+        function animateKeyPress(char, isCorrect) {
+            let keyChar = char.toUpperCase();
+            const keyEl = document.querySelector(`.key[data-key="${keyChar}"]`);
+            if (keyEl) {
+                const cls = isCorrect ? 'key-pressed-correct' : 'key-pressed-wrong';
+                keyEl.classList.add(cls);
+                setTimeout(() => keyEl.classList.remove(cls), 160);
+            }
+        }
+
+        /* ==========================================================================
+           CALCOLO STATISTICHE & HUD
+           ========================================================================== */
+        function calculateWPM() {
+            const elapsedMinutes = (Date.now() - gameState.startTime) / 60000;
+            if (elapsedMinutes <= 0) return 0;
+            return Math.round((gameState.correctKeyPresses / 5) / elapsedMinutes);
+        }
+
+        function calculateCPM() {
+            const elapsedMinutes = (Date.now() - gameState.startTime) / 60000;
+            if (elapsedMinutes <= 0) return 0;
+            return Math.round(gameState.correctKeyPresses / elapsedMinutes);
+        }
+
+        function calculateAccuracy() {
+            if (gameState.totalKeyPresses === 0) return 100;
+            return Math.round((gameState.correctKeyPresses / gameState.totalKeyPresses) * 100);
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-score').textContent = gameState.score;
+            document.getElementById('hud-accuracy').textContent = calculateAccuracy() + '%';
+            document.getElementById('hud-wpm').textContent = calculateWPM();
+            document.getElementById('hud-cpm').textContent = calculateCPM();
+            document.getElementById('hud-combo').textContent = `x${gameState.combo}`;
+        }
+
+        function showToast(text, colorClass) {
+            const overlay = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `font-orbitron font-black text-xl sm:text-2xl ${colorClass} bg-slate-950/95 px-6 py-3 rounded-2xl border border-cyan-500/40 shadow-2xl animate-bounce`;
+            toast.textContent = text;
+            overlay.appendChild(toast);
+            setTimeout(() => toast.remove(), 1100);
+        }
+
+        /* ==========================================================================
+           FINE GIOCO & DOWNLOAD REPORT (.TXT)
+           ========================================================================== */
+        function endGameSession() {
+            gameState.active = false;
+            clearInterval(gameState.timerInterval);
+            setTargetKeyHighlight(null);
+
+            playSound('win');
+
+            const wpm = calculateWPM();
+            const cpm = calculateCPM();
+            const acc = calculateAccuracy();
+
+            // Calcolo Valutazione Stelle
+            let stars = "⭐";
+            let badgeTitle = "🌱 Apprendista Dattilo";
+
+            if (wpm >= 40 && acc >= 95) {
+                stars = "⭐⭐⭐⭐⭐";
+                badgeTitle = "⚡ Dito Fulmineo Space Ace";
+            } else if (wpm >= 30 && acc >= 90) {
+                stars = "⭐⭐⭐⭐";
+                badgeTitle = "🏆 Dito da Record";
+            } else if (wpm >= 20 && acc >= 82) {
+                stars = "⭐⭐⭐";
+                badgeTitle = "🎓 Esperto Dattilografo";
+            } else if (wpm >= 12 && acc >= 72) {
+                stars = "⭐⭐";
+                badgeTitle = "📚 Dattilografo in Crescita";
+            }
+
+            // Popola Modale Risultati
+            document.getElementById('res-stars').textContent = stars;
+            document.getElementById('res-badge').textContent = "Badge: " + badgeTitle;
+            document.getElementById('res-score').textContent = gameState.score;
+            document.getElementById('res-accuracy').textContent = acc + '%';
+            document.getElementById('res-wpm').textContent = wpm;
+            document.getElementById('res-cpm').textContent = cpm;
+            document.getElementById('res-correct').textContent = gameState.correctKeyPresses;
+            document.getElementById('res-errors').textContent = gameState.totalErrors;
+
+            // Tasti più sbagliati
+            const missedBox = document.getElementById('missed-keys-list');
+            const sortedMissed = Object.entries(gameState.missedKeys).sort((a, b) => b[1] - a[1]);
+            
+            if (sortedMissed.length > 0) {
+                missedBox.innerHTML = sortedMissed.slice(0, 4).map(([k, count]) => 
+                    `<span class="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded border border-rose-500/40 font-bold">${k === ' ' ? 'SPAZIO' : k} (${count} err)</span>`
+                ).join(' ');
+            } else {
+                missedBox.textContent = "Nessun errore significativo! Digitazione impeccabile!";
+            }
+
+            document.getElementById('results-modal').classList.remove('hidden');
+        }
+
+        function restartCurrentGame() {
+            document.getElementById('results-modal').classList.add('hidden');
+            initGameSession();
+        }
+
+        /* --- SCARICA REPORT PUNTEGGIO (.TXT) --- */
+        function downloadScoreReport() {
+            const student = gameConfig.studentName || "Studente Anonimo";
+            const studentClass = gameConfig.studentClass || "Non specificata";
+            const dateStr = new Date().toLocaleString('it-IT');
+
+            const diffLabels = ["", "Livello 1: Singole Lettere (26 Lettere A-Z)", "Livello 2: Coppie di Lettere", "Livello 3: Parole Bisillabe", "Livello 4: Parole Trisillabe"];
+            const diffText = diffLabels[gameConfig.difficulty];
+
+            const wpm = calculateWPM();
+            const cpm = calculateCPM();
+            const acc = calculateAccuracy();
+
+            // Elenco errori
+            const sortedMissed = Object.entries(gameState.missedKeys).sort((a, b) => b[1] - a[1]);
+            let missedReportText = "Nessun errore rilevante.";
+            if (sortedMissed.length > 0) {
+                missedReportText = sortedMissed.map(([k, c]) => `Tasto '${k === ' ' ? 'SPAZIO' : k}': ${c} errori`).join(', ');
+            }
+
+            // Consigli Didattici
+            let advice = "";
+            if (acc < 85) {
+                advice = "Rallenta leggermente il ritmo e concentrati sulla precisione di ogni singolo tasto. La dizione corretta precede la velocità!";
+            } else if (wpm < 20) {
+                advice = "Ottima accuratezza! Esercitati quotidianamente per 10 minuti per sviluppare l'automatismo dei movimenti delle dita.";
+            } else {
+                advice = "Prestazione eccellente su tutta la tastiera a 26 lettere! Mantieni la postura corretta dei polsi ed esercitati con frasi articolate.";
+            }
+
+            const reportContent = 
+`================================================================
+           DATTILOSPEED PRO - REPORT PUNTEGGIO ESERCITAZIONE
+          Scuola Secondaria di I Grado • Dattilografia 
+================================================================
+
+DATI IDENTIFICATIVI STUDENTE:
+• Nome e Cognome   : ${student}
+• Classe           : ${studentClass}
+• Data e Ora       : ${dateStr}
+
+PARAMETRI DELL'ESERCIZIO:
+• Contenuti Difficoltà : ${diffText}
+• Durata Timer         : ${gameConfig.timerSeconds} Secondi
+• Modalità Velocità    : ${gameConfig.speedMode.toUpperCase()}
+
+RISULTATI E PRESTAZIONE:
+----------------------------------------------------------------
+• Punteggio Totale      : ${gameState.score} Punti
+• Velocità (WPM)        : ${wpm} Parole al minuto
+• Velocità (CPM)        : ${cpm} Caratteri al minuto
+• Accuratezza           : ${acc}%
+• Caratteri Corretti    : ${gameState.correctKeyPresses}
+• Errori Complessivi    : ${gameState.totalErrors}
+• Massimo Combo         : x${gameState.maxCombo}
+
+ANALISI ERRORE TASTI:
+----------------------------------------------------------------
+• Tasti con più errori  : ${missedReportText}
+
+VALUTAZIONE E CONSIGLIO DIDATTICO:
+----------------------------------------------------------------
+• ${advice}
+
+================================================================
+DattiloSpeed Pro Educational System
+================================================================
+`;
+
+            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+            const fileName = `Report_DattiloSpeed_${student.replace(/\s+/g, '_')}_${Date.now()}.txt`;
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        }
+
+        function openGuideModal() {
+            document.getElementById('guide-modal').classList.remove('hidden');
+        }
+
+        function closeGuideModal() {
+            document.getElementById('guide-modal').classList.add('hidden');
+        }
+
+        /* ==========================================================================
+           SFONDO CANVAS PARTICELLE
+           ========================================================================== */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        }
+
+        function initParticles() {
+            particles = [];
+            const count = Math.floor((canvas.width * canvas.height) / 4200);
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2,
+                    speedY: Math.random() * 0.4 + 0.1,
+                    alpha: Math.random() * 0.6 + 0.2
+                });
+            }
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#38bdf8';
+
+            particles.forEach(p => {
+                p.y += p.speedY;
+                if (p.y > canvas.height) p.y = 0;
+
+                ctx.globalAlpha = p.alpha;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            });
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.onload = () => {
+            resizeCanvas();
+            animateCanvas();
+        };
+
+    </script>
+</body>
+</html>
